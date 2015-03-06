@@ -3,7 +3,7 @@ OPENCV_PATH=/usr/local
 
 # Programs
 CC=
-CXX=g++
+CXX=clang++
 
 # Flags
 ARCH_FLAGS=
