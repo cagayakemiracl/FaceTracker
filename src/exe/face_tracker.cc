@@ -87,105 +87,24 @@ void Draw(cv::Mat &image, cv::Mat &shape, cv::Mat &con, cv::Mat &tri,
     if (visi.at<int>(i, 0) == 0) continue;
     p1 = cv::Point(shape.at<double>(i, 0), shape.at<double>(i + n, 0));
     c = CV_RGB(255, 0, 0);
+    /*
+    std::string str = std::to_string(i);
+    cv::putText(image, str, p1, CV_FONT_HERSHEY_SIMPLEX, 0.5,
+                c);
+    */
     cv::circle(image, p1, 2, c);
   }
   return;
 }
 //=============================================================================
-int parse_cmd(int argc, const char **argv, char *ftFile, char *conFile,
-              char *triFile, bool &fcheck, double &scale, int &fpd) {
-  int i;
-  fcheck = false;
-  scale = 1;
-  fpd = -1;
-  for (i = 1; i < argc; i++) {
-    if ((std::strcmp(argv[i], "-?") == 0) ||
-        (std::strcmp(argv[i], "--help") == 0)) {
-      std::cout
-          << "track_face:- Written by Jason Saragih 2010" << std::endl
-          << "Performs automatic face tracking" << std::endl << std::endl << "#"
-          << std::endl << "# usage: ./face_tracker [options]" << std::endl
-          << "#" << std::endl << std::endl << "Arguments:" << std::endl
-          << "-m <string> -> Tracker model (default: ../model/face2.tracker)"
-          << std::endl
-          << "-c <string> -> Connectivity (default: ../model/face.con)"
-          << std::endl
-          << "-t <string> -> Triangulation (default: ../model/face.tri)"
-          << std::endl << "-s <double> -> Image scaling (default: 1)"
-          << std::endl << "-d <int>    -> Frames/detections (default: -1)"
-          << std::endl << "--check     -> Check for failure" << std::endl;
-      return -1;
-    }
-  }
-  for (i = 1; i < argc; i++) {
-    if (std::strcmp(argv[i], "--check") == 0) {
-      fcheck = true;
-      break;
-    }
-  }
-  if (i >= argc) fcheck = false;
-  for (i = 1; i < argc; i++) {
-    if (std::strcmp(argv[i], "-s") == 0) {
-      if (argc > i + 1)
-        scale = std::atof(argv[i + 1]);
-      else
-        scale = 1;
-      break;
-    }
-  }
-  if (i >= argc) scale = 1;
-  for (i = 1; i < argc; i++) {
-    if (std::strcmp(argv[i], "-d") == 0) {
-      if (argc > i + 1)
-        fpd = std::atoi(argv[i + 1]);
-      else
-        fpd = -1;
-      break;
-    }
-  }
-  if (i >= argc) fpd = -1;
-  for (i = 1; i < argc; i++) {
-    if (std::strcmp(argv[i], "-m") == 0) {
-      if (argc > i + 1)
-        std::strcpy(ftFile, argv[i + 1]);
-      else
-        strcpy(ftFile, "../model/face2.tracker");
-      break;
-    }
-  }
-  if (i >= argc) std::strcpy(ftFile, "../model/face2.tracker");
-  for (i = 1; i < argc; i++) {
-    if (std::strcmp(argv[i], "-c") == 0) {
-      if (argc > i + 1)
-        std::strcpy(conFile, argv[i + 1]);
-      else
-        strcpy(conFile, "../model/face.con");
-      break;
-    }
-  }
-  if (i >= argc) std::strcpy(conFile, "../model/face.con");
-  for (i = 1; i < argc; i++) {
-    if (std::strcmp(argv[i], "-t") == 0) {
-      if (argc > i + 1)
-        std::strcpy(triFile, argv[i + 1]);
-      else
-        strcpy(triFile, "../model/face.tri");
-      break;
-    }
-  }
-  if (i >= argc) std::strcpy(triFile, "../model/face.tri");
-  return 0;
-}
-//=============================================================================
-int main(int argc, const char **argv) {
-  // parse command line arguments
-  char ftFile[256], conFile[256], triFile[256];
+int main(void) {
+  char ftFile[256] = "../model/face2.tracker";
+  char conFile[256] = "../model/face.con";
+  char triFile[256] = "../model/face.tri";
   bool fcheck = false;
   double scale = 1;
   int fpd = -1;
   bool show = true;
-  if (parse_cmd(argc, argv, ftFile, conFile, triFile, fcheck, scale, fpd) < 0)
-    return 0;
 
   // set other tracking parameters
   std::vector<int> wSize1(1);
