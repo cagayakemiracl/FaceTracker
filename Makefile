@@ -7,7 +7,7 @@ CXX=clang++
 
 # Flags
 ARCH_FLAGS=
-CFLAGS=-Wextra -Wall -pedantic-errors $(ARCH_FLAGS) -O3 -Wno-long-long
+CFLAGS=-Wextra -Wall -pedantic-errors $(ARCH_FLAGS) -O3 -Wno-long-long -std=c++11
 LDFLAGS=$(ARCH_FLAGS)
 DEFINES=
 INCLUDES=-I$(OPENCV_PATH)/include -Iinclude/
