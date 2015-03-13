@@ -96,15 +96,11 @@ void Draw(cv::Mat &image, cv::Mat &shape, cv::Mat &con, cv::Mat &tri,
   }
   return;
 }
-//=============================================================================
-int main(void) {
-  char ftFile[256] = "../model/face2.tracker";
-  char conFile[256] = "../model/face.con";
-  char triFile[256] = "../model/face.tri";
+
+void ApplyFaceRecognition(cv::Mat &im, FACETRACKER::Tracker &model,
+                             cv::Mat &con, cv::Mat &tri) {
   bool fcheck = false;
-  double scale = 1;
   int fpd = -1;
-  bool show = true;
 
   // set other tracking parameters
   std::vector<int> wSize1(1);
@@ -115,70 +111,76 @@ int main(void) {
   wSize2[2] = 7;
   int nIter = 5;
   double clamp = 3, fTol = 0.01;
+
+  static double fps = 0;
+  char sss[256];
+  std::string text;
+
+  cv::Mat gray;
+  static int64 t1, t0 = cvGetTickCount();
+  static int fnum = 0;
+
+  static bool failed = true;
+
+  cv::flip(im, im, 1);
+  cv::cvtColor(im, gray, CV_BGR2GRAY);
+  // track this image
+  std::vector<int> wSize;
+  if (failed)
+    wSize = wSize2;
+  else
+    wSize = wSize1;
+  if (model.Track(gray, wSize, fpd, nIter, clamp, fTol, fcheck) == 0) {
+    int idx = model._clm.GetViewIdx();
+    failed = false;
+    Draw(im, model._shape, con, tri, model._clm._visi[idx]);
+  } else {
+    cv::Mat R(im, cvRect(0, 0, 150, 50));
+    R = cv::Scalar(0, 0, 255);
+    model.FrameReset();
+    failed = true;
+  }
+  // draw framerate on display image
+  if (fnum >= 9) {
+    t1 = cvGetTickCount();
+    fps = 10.0 / ((double(t1 - t0) / cvGetTickFrequency()) / 1e+6);
+    t0 = t1;
+    fnum = 0;
+  } else
+    fnum += 1;
+  
+  sprintf(sss, "%d frames/sec", (int)round(fps));
+  text = sss;
+  cv::putText(im, text, cv::Point(10, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5,
+                CV_RGB(255, 255, 255));
+}
+//=============================================================================
+int main(void) {
+  char ftFile[256] = "../model/face2.tracker";
+  char conFile[256] = "../model/face.con";
+  char triFile[256] = "../model/face.tri";
+
   FACETRACKER::Tracker model(ftFile);
   cv::Mat tri = FACETRACKER::IO::LoadTri(triFile);
   cv::Mat con = FACETRACKER::IO::LoadCon(conFile);
 
   // initialize camera and display window
-  cv::Mat frame, gray, im;
-  double fps = 0;
-  char sss[256];
-  std::string text;
+  cv::Mat im;
   CvCapture *camera = cvCreateCameraCapture(CV_CAP_ANY);
   if (!camera) return -1;
-  int64 t1, t0 = cvGetTickCount();
-  int fnum = 0;
   cvNamedWindow("Face Tracker", 1);
   std::cout << "Hot keys: " << std::endl << "\t ESC - quit" << std::endl
             << "\t d   - Redetect" << std::endl;
 
   // loop until quit (i.e user presses ESC)
-  bool failed = true;
   while (1) {
     // grab image, resize and flip
     IplImage *I = cvQueryFrame(camera);
     if (!I) continue;
-    frame = I;
-    if (scale == 1)
-      im = frame;
-    else
-      cv::resize(frame, im, cv::Size(scale * frame.cols, scale * frame.rows));
-    cv::flip(im, im, 1);
-    cv::cvtColor(im, gray, CV_BGR2GRAY);
+    im = I;
 
-    // track this image
-    std::vector<int> wSize;
-    if (failed)
-      wSize = wSize2;
-    else
-      wSize = wSize1;
-    if (model.Track(gray, wSize, fpd, nIter, clamp, fTol, fcheck) == 0) {
-      int idx = model._clm.GetViewIdx();
-      failed = false;
-      Draw(im, model._shape, con, tri, model._clm._visi[idx]);
-    } else {
-      if (show) {
-        cv::Mat R(im, cvRect(0, 0, 150, 50));
-        R = cv::Scalar(0, 0, 255);
-      }
-      model.FrameReset();
-      failed = true;
-    }
-    // draw framerate on display image
-    if (fnum >= 9) {
-      t1 = cvGetTickCount();
-      fps = 10.0 / ((double(t1 - t0) / cvGetTickFrequency()) / 1e+6);
-      t0 = t1;
-      fnum = 0;
-    } else
-      fnum += 1;
-    if (show) {
-      sprintf(sss, "%d frames/sec", (int)round(fps));
-      text = sss;
-      cv::putText(im, text, cv::Point(10, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5,
-                  CV_RGB(255, 255, 255));
-    }
     // show image and check for user input
+    ApplyFaceRecognition(im, model, con, tri);
     imshow("Face Tracker", im);
     int c = cvWaitKey(10);
     if (c == 27)
