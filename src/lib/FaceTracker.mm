@@ -37,12 +37,13 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 // THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///////////////////////////////////////////////////////////////////////////////
-#include <FaceTracker/Tracker.h>
+#include <FaceTracker/FaceTracker.h>
 #include <opencv/highgui.h>
 #include <iostream>
+using namespace FACETRACKER;
 //=============================================================================
-void Draw(cv::Mat &image, cv::Mat &shape, cv::Mat &con, cv::Mat &tri,
-          cv::Mat &visi) {
+void FaceTracker::Draw(cv::Mat &image, cv::Mat &shape, cv::Mat &con,
+                       cv::Mat &tri, cv::Mat &visi) {
   int i, n = shape.rows / 2;
   cv::Point p1, p2;
   cv::Scalar c;
@@ -97,8 +98,8 @@ void Draw(cv::Mat &image, cv::Mat &shape, cv::Mat &con, cv::Mat &tri,
   return;
 }
 
-void ApplyFaceRecognition(cv::Mat &im, FACETRACKER::Tracker &model,
-                             cv::Mat &con, cv::Mat &tri) {
+void FaceTracker::ApplyFaceRecognition(cv::Mat &im, Tracker &model,
+                                       cv::Mat &con, cv::Mat &tri) {
   bool fcheck = false;
   int fpd = -1;
 
@@ -148,46 +149,9 @@ void ApplyFaceRecognition(cv::Mat &im, FACETRACKER::Tracker &model,
     fnum = 0;
   } else
     fnum += 1;
-  
+
   sprintf(sss, "%d frames/sec", (int)round(fps));
   text = sss;
   cv::putText(im, text, cv::Point(10, 20), CV_FONT_HERSHEY_SIMPLEX, 0.5,
-                CV_RGB(255, 255, 255));
+              CV_RGB(255, 255, 255));
 }
-//=============================================================================
-int main(void) {
-  char ftFile[256] = "../model/face2.tracker";
-  char conFile[256] = "../model/face.con";
-  char triFile[256] = "../model/face.tri";
-
-  FACETRACKER::Tracker model(ftFile);
-  cv::Mat tri = FACETRACKER::IO::LoadTri(triFile);
-  cv::Mat con = FACETRACKER::IO::LoadCon(conFile);
-
-  // initialize camera and display window
-  cv::Mat im;
-  CvCapture *camera = cvCreateCameraCapture(CV_CAP_ANY);
-  if (!camera) return -1;
-  cvNamedWindow("Face Tracker", 1);
-  std::cout << "Hot keys: " << std::endl << "\t ESC - quit" << std::endl
-            << "\t d   - Redetect" << std::endl;
-
-  // loop until quit (i.e user presses ESC)
-  while (1) {
-    // grab image, resize and flip
-    IplImage *I = cvQueryFrame(camera);
-    if (!I) continue;
-    im = I;
-
-    // show image and check for user input
-    ApplyFaceRecognition(im, model, con, tri);
-    imshow("Face Tracker", im);
-    int c = cvWaitKey(10);
-    if (c == 27)
-      break;
-    else if (char(c) == 'd')
-      model.FrameReset();
-  }
-  return 0;
-}
-//=============================================================================

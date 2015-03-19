@@ -22,10 +22,11 @@ SOURCE_FILES=\
 	src/lib/FDet.mm\
 	src/lib/PAW.mm\
 	src/lib/FCheck.mm\
-	src/lib/Tracker.mm
+	src/lib/Tracker.mm\
+	src/lib/FaceTracker.mm
 
 # Source files which contain a int main(..) function
-SOURCE_FILES_WITH_MAIN=src/exe/face_tracker.mm
+SOURCE_FILES_WITH_MAIN=src/exe/main.mm
 
 # End Configuration
 SOURCE_OBJECTS=$(patsubst %.mm,%.o,$(SOURCE_FILES))
