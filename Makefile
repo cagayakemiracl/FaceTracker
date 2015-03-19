@@ -15,34 +15,34 @@ LIBRARIES=-L$(OPENCV_PATH)/lib -lopencv_core -lopencv_highgui -lopencv_imgproc -
 
 # Files which require compiling
 SOURCE_FILES=\
-	src/lib/IO.mm\
-	src/lib/PDM.mm\
-	src/lib/Patch.mm\
-	src/lib/CLM.mm\
-	src/lib/FDet.mm\
-	src/lib/PAW.mm\
-	src/lib/FCheck.mm\
-	src/lib/Tracker.mm\
-	src/lib/FaceTracker.mm
+	src/lib/IO.cc\
+	src/lib/PDM.cc\
+	src/lib/Patch.cc\
+	src/lib/CLM.cc\
+	src/lib/FDet.cc\
+	src/lib/PAW.cc\
+	src/lib/FCheck.cc\
+	src/lib/Tracker.cc\
+	src/lib/FaceTracker.cc
 
 # Source files which contain a int main(..) function
-SOURCE_FILES_WITH_MAIN=src/exe/main.mm
+SOURCE_FILES_WITH_MAIN=src/exe/main.cc
 
 # End Configuration
-SOURCE_OBJECTS=$(patsubst %.mm,%.o,$(SOURCE_FILES))
+SOURCE_OBJECTS=$(patsubst %.cc,%.o,$(SOURCE_FILES))
 
 ALL_OBJECTS=\
 	$(SOURCE_OBJECTS) \
-	$(patsubst %.mm,%.o,$(SOURCE_FILES_WITH_MAIN))
+	$(patsubst %.cc,%.o,$(SOURCE_FILES_WITH_MAIN))
 
 DEPENDENCY_FILES=\
 	$(patsubst %.o,%.d,$(ALL_OBJECTS)) 
 
 all: bin/face_tracker
 
-%.o: %.mm Makefile
+%.o: %.cc Makefile
 	@# Make dependecy file
-	$(CXX) -MM -MT $@ -MF $(patsubst %.mm,%.d,$<) $(CFLAGS) $(DEFINES) $(INCLUDES) $<
+	$(CXX) -MM -MT $@ -MF $(patsubst %.cc,%.d,$<) $(CFLAGS) $(DEFINES) $(INCLUDES) $<
 	@# Compile
 	$(CXX) $(CFLAGS) $(DEFINES) -c -o $@ $< $(INCLUDES)
 
