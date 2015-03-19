@@ -47,8 +47,8 @@ int main(void) {
   char triFile[256] = "../model/face.tri";
 
   FACETRACKER::Tracker model(ftFile);
-  cv::Mat tri = FACETRACKER::IO::LoadTri(triFile);
   cv::Mat con = FACETRACKER::IO::LoadCon(conFile);
+  cv::Mat tri = FACETRACKER::IO::LoadTri(triFile);
 
   // initialize camera and display window
   cv::Mat im;
